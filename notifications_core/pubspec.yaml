@@ -1,6 +1,6 @@
 name: notifications_core
 description: "A Flutter package for cross-platform push notifications with multi-provider support and Riverpod integration."
-version: 0.0.1
+version: 0.1.0
 homepage:
 
 environment:
