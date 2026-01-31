@@ -13,6 +13,11 @@ library router_core;
 export 'src/domain/entities/route_params.dart';
 export 'src/domain/entities/typed_route.dart';
 
+// Domain - Entities (Guards)
+export 'src/domain/entities/guard_context.dart';
+export 'src/domain/entities/guard_result.dart';
+export 'src/domain/entities/route_guard.dart';
+
 // Domain - Entities (Exit Guard)
 export 'src/domain/entities/exit_guard_config.dart';
 export 'src/domain/entities/exit_guard_state.dart';
@@ -21,8 +26,12 @@ export 'src/domain/entities/exit_guard_state.dart';
 export 'src/domain/interfaces/exit_guard_controller.dart';
 export 'src/domain/interfaces/exit_confirmation_dialog.dart';
 
+// Application - Services
+export 'src/application/services/guard_service.dart';
+
 // Application - Providers
 export 'src/application/providers/exit_guard_providers.dart';
+export 'src/application/providers/guard_providers.dart';
 export 'src/application/notifiers/exit_guard_notifier.dart';
 
 // Application - Builders (Typed Routes)

@@ -159,6 +159,46 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
 }
 ```
 
+### 5. Route Guards
+
+Protect routes using centralized guards (e.g. Authentication).
+
+1. **Create a Guard**:
+```dart
+class AuthGuard extends RouteGuard {
+  final Ref ref;
+  const AuthGuard(this.ref);
+
+  @override
+  String get name => 'auth';
+
+  @override
+  FutureOr<GuardResult> check(GuardContext context) {
+    // Example: Check if user is authenticated
+    final isLoggedIn = ref.read(authProvider).isLoggedIn;
+    
+    if (!isLoggedIn && context.location != '/login') {
+      return const GuardResult.redirect('/login');
+    }
+    return const GuardResult.allowed();
+  }
+}
+```
+
+2. **Register & Connect**:
+```dart
+// Register the guard
+final guardService = ref.read(guardServiceProvider);
+guardService.register(AuthGuard(ref));
+
+// Connect to GoRouter
+final router = GoRouter(
+  redirect: ref.read(guardRedirectProvider),
+  routes: [/*...*/],
+);
+```
+
+
 ## Architecture
 
 ```
@@ -178,8 +218,11 @@ router_core/
 │       ├── application/              # Riverpod & Builders
 │       │   ├── builders/
 │       │   │   └── route_builder.dart       # AppRouteConfig, AppRouteExtension
+│       │   ├── services/
+│       │   │   └── guard_service.dart
 │       │   ├── providers/
-│       │   │   └── exit_guard_providers.dart
+│       │   │   ├── exit_guard_providers.dart
+│       │   │   └── guard_providers.dart
 │       │   └── notifiers/
 │       │       └── exit_guard_notifier.dart
 │       └── presentation/             # Widgets & Mixins
@@ -217,6 +260,16 @@ router_core/
 | `exitGuardStateProvider` | `StateNotifierProvider` | Guard state changes |
 | `exitGuardControllerProvider` | `Provider<IExitGuardController>` | Controller for manual ops |
 | `exitConfirmationDialogProvider` | `Provider<IExitConfirmationDialog>` | Dialog implementation |
+
+### Route Guards
+
+| Class | Description |
+|-------|-------------|
+| `RouteGuard` | Base class for implementing guards |
+| `FunctionalGuard` | Simple closure-based guard |
+| `GuardResult` | Sealed class for check result (allowed, blocked, redirect) |
+| `GuardContext` | Context passed to guards (location, params) |
+| `GuardService` | Service that executes guards |
 
 ## Customization
 
