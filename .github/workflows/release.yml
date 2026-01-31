@@ -1,0 +1,39 @@
+name: Release Package
+
+on:
+  push:
+    tags:
+      - '*_core-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Parse Tag
+        id: parse_tag
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          # Extract package name (everything before -v)
+          PACKAGE_NAME=$(echo $TAG_NAME | sed -E 's/-v[0-9]+\.[0-9]+\.[0-9]+.*//')
+          # Extract version (everything after -v)
+          VERSION=$(echo $TAG_NAME | sed -E 's/.*-v//')
+          
+          echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted: Package=$PACKAGE_NAME, Version=$VERSION"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "${{ steps.parse_tag.outputs.package_name }} v${{ steps.parse_tag.outputs.version }}"
+          generate_release_notes: true
+          files: |
+            ${{ steps.parse_tag.outputs.package_name }}/pubspec.yaml
+            ${{ steps.parse_tag.outputs.package_name }}/CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

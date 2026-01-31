@@ -1,0 +1,36 @@
+name: router_core
+description: A decoupled navigation package for Flutter with GoRouter and exit confirmation.
+version: 0.1.0
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.29.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Navigation
+  go_router: ^14.2.7
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Immutable Entities
+  freezed_annotation: ^2.4.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  
+  # Code Generation
+  build_runner: ^2.4.12
+  freezed: ^2.5.7
+  riverpod_generator: ^2.4.3
+  
+  # Testing
+  mocktail: ^1.0.4
+
+flutter:
