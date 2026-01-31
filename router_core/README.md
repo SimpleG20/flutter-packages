@@ -1,9 +1,11 @@
-# Navigation Kit
+# Router Core
 
-A decoupled navigation package for Flutter with exit confirmation support.
+A decoupled navigation package for Flutter with type-safe routing and exit confirmation support.
 
 ## Features
 
+- **Typed Routes**: Type-safe route definitions with compile-time verification
+- **Route Builder**: Fluent API for GoRouter integration
 - **Exit Guard System**: Protect pages with unsaved changes
 - **PopScope Integration**: Intercepts back button, swipe gestures (iOS/Android)
 - **Riverpod State Management**: Centralized state with override support
@@ -15,29 +17,109 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  navigation_kit:
-    path: packages/navigation_kit
+  router_core:
+    git:
+      url: https://github.com/your-org/flutter-packages.git
+      path: router_core
+      ref: main
 ```
 
 Run code generation:
 
 ```bash
-cd packages/navigation_kit
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 ```
 
 ## Quick Start
 
-### 1. Wrap your app with ProviderScope
+### 1. Define Typed Routes
 
 ```dart
-void main() {
-  runApp(const ProviderScope(child: MyApp()));
+import 'package:router_core/router_core.dart';
+
+// Define route parameters
+class UserParams extends RouteParams {
+  final String userId;
+  final String? tab;
+
+  const UserParams({required this.userId, this.tab});
+
+  @override
+  Map<String, String> toPathParams() => {'userId': userId};
+
+  @override
+  Map<String, dynamic> toQueryParams() => tab != null ? {'tab': tab} : {};
+}
+
+// Define typed routes
+class HomeRoute extends AppRoute<NoParams> {
+  const HomeRoute();
+  
+  @override String get name => 'home';
+  @override String get path => '/';
+  @override String buildPath([NoParams? params]) => path;
+}
+
+class UserRoute extends AppRoute<UserParams> {
+  const UserRoute();
+  
+  @override String get name => 'user';
+  @override String get path => '/user/:userId';
+  
+  @override
+  String buildPath([UserParams? params]) {
+    if (params == null) return path;
+    return '/user/${params.userId}';
+  }
+
+  @override
+  UserParams? extractParams(Map<String, String> pathParams) {
+    final userId = pathParams['userId'];
+    if (userId == null) return null;
+    return UserParams(userId: userId);
+  }
+}
+
+// Route registry
+abstract class AppRoutes with RouteRegistry {
+  static const home = HomeRoute();
+  static const user = UserRoute();
 }
 ```
 
-### 2. Add the mixin to your page
+### 2. Configure GoRouter
+
+```dart
+final routerProvider = Provider<GoRouter>((ref) {
+  return GoRouter(
+    initialLocation: AppRoutes.home.path,
+    routes: [
+      AppRoutes.home.toGoRoute(
+        builder: (ctx, state, params) => const HomePage(),
+      ),
+      AppRoutes.user.toGoRoute(
+        builder: (ctx, state, params) => UserPage(userId: params!.userId),
+      ),
+    ],
+  );
+});
+```
+
+### 3. Navigate with Type Safety
+
+```dart
+// Using GoRouter extension
+context.go(AppRoutes.user.buildPath(UserParams(userId: '123')));
+
+// Or with named routes
+context.goNamed(
+  AppRoutes.user.name,
+  pathParameters: {'userId': '123'},
+);
+```
+
+### 4. Exit Guard (Optional)
 
 ```dart
 class EditProfilePage extends ConsumerStatefulWidget {
@@ -68,7 +150,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
         body: TextField(
           onChanged: (value) {
             setState(() => _hasChanges = value.isNotEmpty);
-            updateExitGuard(); // Sync with guard
+            updateExitGuard();
           },
         ),
       ),
@@ -80,18 +162,22 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage>
 ## Architecture
 
 ```
-navigation_kit/
+router_core/
 ├── lib/
-│   ├── navigation_kit.dart           # Barrel file
+│   ├── router_core.dart              # Barrel file
 │   └── src/
 │       ├── domain/                   # Entities & Interfaces
 │       │   ├── entities/
+│       │   │   ├── route_params.dart        # RouteParams, NoParams
+│       │   │   ├── typed_route.dart         # AppRoute, RouteRegistry, RouteMetadata
 │       │   │   ├── exit_guard_config.dart
 │       │   │   └── exit_guard_state.dart
 │       │   └── interfaces/
 │       │       ├── exit_guard_controller.dart
 │       │       └── exit_confirmation_dialog.dart
-│       ├── application/              # Riverpod
+│       ├── application/              # Riverpod & Builders
+│       │   ├── builders/
+│       │   │   └── route_builder.dart       # AppRouteConfig, AppRouteExtension
 │       │   ├── providers/
 │       │   │   └── exit_guard_providers.dart
 │       │   └── notifiers/
@@ -104,15 +190,42 @@ navigation_kit/
 │               └── exit_guard_mixin.dart
 ```
 
+## API Reference
+
+### Typed Routes
+
+| Class | Description |
+|-------|-------------|
+| `RouteParams` | Base class for route parameters |
+| `NoParams` | For routes without parameters |
+| `AppRoute<T>` | Base class for typed route definitions |
+| `RouteRegistry` | Mixin for route registry classes |
+| `RouteMetadata` | Mixin for route metadata (title, icon) |
+
+### Route Builder
+
+| Class/Extension | Description |
+|-----------------|-------------|
+| `AppRouteConfig` | Configuration wrapper for typed routes |
+| `AppRouteExtension` | Extension methods on `AppRoute` |
+| `AppPageBuilder` | Typedef for page builder functions |
+
+### Exit Guard
+
+| Provider | Type | Description |
+|----------|------|-------------|
+| `exitGuardStateProvider` | `StateNotifierProvider` | Guard state changes |
+| `exitGuardControllerProvider` | `Provider<IExitGuardController>` | Controller for manual ops |
+| `exitConfirmationDialogProvider` | `Provider<IExitConfirmationDialog>` | Dialog implementation |
+
 ## Customization
 
-### Custom Dialog
+### Custom Exit Dialog
 
 ```dart
 class MyCustomDialog implements IExitConfirmationDialog {
   @override
   Future<bool> show(BuildContext context, ExitGuardConfig config) async {
-    // Show your custom dialog
     return await showCupertinoDialog<bool>(...) ?? false;
   }
 }
@@ -125,13 +238,22 @@ final container = ProviderContainer(
 );
 ```
 
-## Available Providers
+### Route Metadata
 
-| Provider | Type | Description |
-|----------|------|-------------|
-| `exitGuardStateProvider` | `StateNotifierProvider` | Guard state changes |
-| `exitGuardControllerProvider` | `Provider<IExitGuardController>` | Controller for manual ops |
-| `exitConfirmationDialogProvider` | `Provider<IExitConfirmationDialog>` | Dialog implementation |
+```dart
+class SettingsRoute extends AppRoute<NoParams> with RouteMetadata<NoParams> {
+  const SettingsRoute();
+
+  @override String get name => 'settings';
+  @override String get path => '/settings';
+  @override String buildPath([NoParams? p]) => path;
+
+  @override String? get title => 'Settings';
+  @override dynamic get icon => Icons.settings;
+  @override bool get showInNavigation => true;
+  @override int get navigationOrder => 3;
+}
+```
 
 ## License
 

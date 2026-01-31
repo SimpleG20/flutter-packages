@@ -1,13 +1,19 @@
 /// A decoupled navigation package for Flutter with exit confirmation.
 ///
 /// This package provides:
-/// - Exit guard system for protecting pages with unsaved changes
-/// - Integration with Flutter's PopScope for back button/gesture interception
-/// - Riverpod providers for state management
-/// - Customizable confirmation dialog
-library navigation_kit;
+/// - **Typed Routes**: Type-safe route definitions with compile-time verification
+/// - **Route Builder**: Fluent API for GoRouter integration
+/// - **Exit Guard System**: Protecting pages with unsaved changes
+/// - **PopScope Integration**: Back button/gesture interception
+/// - **Riverpod State Management**: Centralized state with override support
+/// - **Customizable Dialog**: Default Material dialog with full customization
+library router_core;
 
-// Domain - Entities
+// Domain - Entities (Typed Routes)
+export 'src/domain/entities/route_params.dart';
+export 'src/domain/entities/typed_route.dart';
+
+// Domain - Entities (Exit Guard)
 export 'src/domain/entities/exit_guard_config.dart';
 export 'src/domain/entities/exit_guard_state.dart';
 
@@ -18,6 +24,9 @@ export 'src/domain/interfaces/exit_confirmation_dialog.dart';
 // Application - Providers
 export 'src/application/providers/exit_guard_providers.dart';
 export 'src/application/notifiers/exit_guard_notifier.dart';
+
+// Application - Builders (Typed Routes)
+export 'src/application/builders/route_builder.dart';
 
 // Presentation - Widgets
 export 'src/presentation/widgets/exit_guard_shell.dart';

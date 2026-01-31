@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:navigation_kit/src/domain/entities/exit_guard_config.dart';
-import 'package:navigation_kit/src/domain/entities/exit_guard_state.dart';
+import 'package:router_core/src/domain/entities/exit_guard_config.dart';
+import 'package:router_core/src/domain/entities/exit_guard_state.dart';
 
 void main() {
   group('ExitGuardState', () {
