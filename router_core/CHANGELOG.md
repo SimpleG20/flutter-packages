@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-01-31
+
+### Added
+- **Safe Navigation Wrappers**: New `safeGo`, `safeGoNamed`, `safePush`, `safePushNamed` helper functions that integrate with `ExitGuard`.
+- **Pop Wrappers**: Added `safePop` (alias for `context.pop`) and `unsafePop` (forces exit without confirmation).
+- **Unsafe Navigation Wrappers**: Explicit `unsafe*` variants for bypassing checks.
+
 ## [0.2.0] - 2026-01-31
 
 ### Added

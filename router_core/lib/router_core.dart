@@ -56,3 +56,6 @@ export 'src/presentation/extensions/navigation_extensions.dart';
 
 // Presentation - Mixins
 export 'src/presentation/mixins/exit_guard_mixin.dart';
+
+// Presentation - Wrappers
+export 'src/presentation/wrappers/navigation_wrappers.dart';
