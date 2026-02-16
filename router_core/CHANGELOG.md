@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2026-02-16
+
+### Changed
+- Refined dependency constraints and environment requirements.
+
 ## [0.3.0] - 2026-01-31
 
 ### Added
